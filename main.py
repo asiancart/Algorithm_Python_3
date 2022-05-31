@@ -1,204 +1,236 @@
-import random ,sys
+import time , random , sys
 
-WIDTH = 40
-HEIGHT = 20
-NUM_ROBOTS = 10
-NUM_TELEPORTS = 2
-NUM_DEAD_ROBOTS = 2
-NUM_WALLS = 100
+SUSPECTS = ['DUKE HAUTDOG', 'MAXIMUM POWERS', 'BILL MONOPOLIS', 'SENATOR SCHMEAR','MRS. FEATHERTOSS', 'DR. JEAN SPLICER', 'RAFFLES THE CLOWN', 'ESPRESSA TOFFEEPOT','CECIL EDGAR VANDERTON']
+ITEMS = ['FLASHLIGHT', 'CANDLESTICK', 'RAINBOW FLAG', 'HAMSTER WHEEL', 'ANIME VHS TAPE','JAR OF PICKLES', 'ONE COWBOY BOOT', 'CLEAN UNDERPANTS', '5 DOLLAR GIFT CARD']
+PLACES = ['ZOO', 'OLD BARN', 'DUCK POND', 'CITY HALL', 'HIPSTER CAFE', 'BOWLING ALLEY','VIDEO GAME MUSEUM', 'UNIVERSITY LIBRARY', 'ALBINO ALLIGATOR PIT']
+TIME_TO_SOLVE = 300
 
-EMPTY_SPACE = ' '
-PLAYER = '@'
-ROBOT = 'R'
-DEAD_ROBOT = 'X'
-
-WALL = chr(9617)
-
-def main():
-    print('''Hungry Robots, by asiancart''')
-
-    input('Press Enter to begin...')
-    board = getNewBoard()
-    robots = addRobots(board)
-    playerPosition = getRandomEmptySpace(board, robots)
-    while True:
-        displayBoard(board, robots, playerPosition)
-
-        if len(robots) == 0:
-            print('All the robots have crashed into each other and you')
-            print('lived to tell the tale! Good job!')
-            sys.exit()
-
-        playerPosition = askForPlayerMove(board, robots, playerPosition)
-        robots = moveRobots(board, robots, playerPosition)
-
-        for x, y in robots:
-            if (x, y) == playerPosition:
-                displayBoard(board, robots, playerPosition)
-                print('You have been caught by a robot!')
-                sys.exit()
+PLACE_FIRST_LETTERS = {}
+LONGEST_PLACE_NAME_LENGTH = 0
+for place in PLACES:
+    PLACE_FIRST_LETTERS[place[0]] = place
+    if len(place) > LONGEST_PLACE_NAME_LENGTH:
+        LONGEST_PLACE_NAME_LENGTH = len(place)
 
 
-def getNewBoard():
-    board = {'teleports': NUM_TELEPORTS}
+assert len(SUSPECTS) == 9
+assert len(ITEMS) == 9
+assert len(PLACES) == 9
 
-    for x in range(WIDTH):
-        for y in range(HEIGHT):
-            board[(x, y)] = EMPTY_SPACE
+assert len(PLACE_FIRST_LETTERS.keys()) == len(PLACES)
 
-    for x in range(WIDTH):
-        board[(x, 0)] = WALL
-        board[(x, HEIGHT - 1)] = WALL
-    for y in range(HEIGHT):
-        board[(0, y)] = WALL
-        board[(WIDTH - 1, y)] = WALL
+knownSuspectsAndItems = []
+visitedPlaces = {}
+currentLocation = 'TAXI'
+accusedSuspects = []
+liars = random.sample(SUSPECTS,random.randint(3,4))
+accusationsLeft = 3
+culprit = random.choice(SUSPECTS)
 
-    for i in range(NUM_WALLS):
-        x, y = getRandomEmptySpace(board, [])
-        board[(x, y)] = WALL
+random.shuffle(SUSPECTS)
+random.shuffle(ITEMS)
+random.shuffle(PLACES)
 
-    for i in range(NUM_DEAD_ROBOTS):
-        x, y = getRandomEmptySpace(board, [])
-        board[(x, y)] = DEAD_ROBOT
-    return board
+clues = {}
+for i ,  interviewee in enumerate(SUSPECTS):
+    if interviewee in liars:
+        continue
 
-def getRandomEmptySpace(board, robots):
-    while True:
-        randomX = random.randint(1, WIDTH - 2)
-        randomY = random.randint(1, HEIGHT - 2)
-        if isEmpty(randomX, randomY, board, robots):
-            break
-    return (randomX, randomY)
-
-def isEmpty(x, y, board, robots):
-    return board[(x, y)] == EMPTY_SPACE and (x, y) not in robots
-
-def addRobots(board):
-    robots = []
-    for i in range(NUM_ROBOTS):
-        x, y = getRandomEmptySpace(board, robots)
-        robots.append((x, y))
-    return robots
-
-
-def displayBoard(board, robots, playerPosition):
-    for y in range(HEIGHT):
-        for x in range(WIDTH):
-            if board[(x, y)] == WALL:
-                print(WALL, end='')
-            elif board[(x, y)] == DEAD_ROBOT:
-                print(DEAD_ROBOT, end='')
-            elif (x, y) == playerPosition:
-                print(PLAYER, end='')
-            elif (x, y) in robots:
-                print(ROBOT, end='')
-            else:
-                print(EMPTY_SPACE, end='')
-        print()
-
-
-def askForPlayerMove(board, robots, playerPosition):
-    playerX, playerY = playerPosition
-
-    q = 'Q' if isEmpty(playerX - 1, playerY - 1, board, robots) else ' '
-    w = 'W' if isEmpty(playerX + 0, playerY - 1, board, robots) else ' '
-    e = 'E' if isEmpty(playerX + 1, playerY - 1, board, robots) else ' '
-    d = 'D' if isEmpty(playerX + 1, playerY + 0, board, robots) else ' '
-    c = 'C' if isEmpty(playerX + 1, playerY + 1, board, robots) else ' '
-    x = 'X' if isEmpty(playerX + 0, playerY + 1, board, robots) else ' '
-    z = 'Z' if isEmpty(playerX - 1, playerY + 1, board, robots) else ' '
-    a = 'A' if isEmpty(playerX - 1, playerY + 0, board, robots) else ' '
-    allMoves = (q + w + e + d + c + x + a + z + 'S')
-
-
-    while True:
-        print('(T)eleports remaining: {}'.format(board["teleports"]))
-        print('                     ({}) ({}) ({})'.format(q, w, e))
-        print('                     ({}) (S) ({})'.format(a, d))
-        print('Enter move or QUIT: ({}) ({}) ({})'.format(z, x, c))
-
-        move = input('> ').upper()
-        if move == 'QUIT':
-            print('Thanks for playing!')
-            sys.exit()
-        elif move == 'T' and board['teleports'] > 0:
-            board['teleports'] -= 1
-            return getRandomEmptySpace(board, robots)
-        elif move != '' and move in allMoves:
-            return {'Q': (playerX - 1, playerY - 1),
-                    'W': (playerX + 0, playerY - 1),
-                    'E': (playerX + 1, playerY - 1),
-                    'D': (playerX + 1, playerY + 0),
-                    'C': (playerX + 1, playerY + 1),
-                    'X': (playerX + 0, playerY + 1),
-                    'Z': (playerX - 1, playerY + 1),
-                    'A': (playerX - 1, playerY + 0),
-                    'S': (playerX, playerY)}[move]
-
-
-def moveRobots(board, robotPositions, playerPosition):
-    playerx, playery = playerPosition
-    nextRobotPositions = []
-
-    while len(robotPositions) > 0:
-        robotx, roboty = robotPositions[0]
-
-        if robotx < playerx:
-            movex = 1
-        elif robotx > playerx:
-            movex = -1
-        elif robotx == playerx:
-            movex = 0
-
-        if roboty < playery:
-            movey = 1
-        elif roboty > playery:
-            movey = -1
-        elif roboty == playery:
-            movey = 0
-
-        if board[(robotx + movex, roboty + movey)] == WALL:
-            if board[(robotx + movex, roboty)] == EMPTY_SPACE:
-                movey = 0
-            elif board[(robotx, roboty + movey)] == EMPTY_SPACE:
-                movex = 0
-            else:
-                movex = 0
-                movey = 0
-        newRobotx = robotx + movex
-        newRoboty = roboty + movey
-
-        if (board[(robotx, roboty)] == DEAD_ROBOT or board[(newRobotx, newRoboty)] == DEAD_ROBOT):
-            del robotPositions[0]
-            continue
-
-        if (newRobotx, newRoboty) in nextRobotPositions:
-            board[(newRobotx, newRoboty)] = DEAD_ROBOT
-            nextRobotPositions.remove((newRobotx, newRoboty))
+    clues[interviewee] = {}
+    clues[interviewee]['debug_liar'] = False
+    for item in ITEMS:
+        if random.randint(0,1) == 0:
+            clues[interviewee][item] = PLACES[ITEMS.index(item)]
         else:
-            nextRobotPositions.append((newRobotx, newRoboty))
-
-        del robotPositions[0]
-    return nextRobotPositions
-
-
-if __name__ == '__main__':
-    main()
+            clues[interviewee][item] = SUSPECTS[ITEMS.index(item)]
+    for suspect in SUSPECTS:
+        if random.randint(0,1) == 0:
+            clues[interviewee][suspect] = PLACES[SUSPECTS.index(suspect)]
+        else:
+            clues[interviewee][suspect] = ITEMS[SUSPECTS.index(suspect)]
 
 
 
+for i , interviewee in enumerate(SUSPECTS):
+    if interviewee not in liars:
+        continue
+
+    clues[interviewee] = {}
+    clues[interviewee]['debug_liar'] = True
+
+    for item in ITEMS:
+        if random.randint(0,1) == 0:
+            while True:
+                clues[interviewee][item] = random.choice(PLACES)
+                if clues[interviewee][item] != PLACES[ITEMS.index(item)]:
+                    break
+        else:
+            while True:
+                clues[interviewee][item] = random.choice(SUSPECTS)
+                if clues[interviewee][item] != SUSPECTS[ITEMS.index(item)]:
+                    break
+    for suspect in SUSPECTS:
+        if random.randint(0,1) == 0:
+            while True:
+                clues[interviewee][suspect] = random.choice(PLACES)
+                if clues[interviewee][suspect] != PLACES[ITEMS.index(item)]:
+                    break
+        else:
+            while True:
+                clues[interviewee][suspect] = random.choice(ITEMS)
+                if clues[interviewee][suspect] != ITEMS[SUSPECTS.index(suspect)]:
+                    break
 
 
+zophieClues = {}
+for interviewee in random.sample(SUSPECTS,random.randint(3,4)):
+    kindOfClue = random.randint(1,3)
+    if kindOfClue == 1:
+        if interviewee not in liars:
+            zophieClues[interviewee] = culprit
+        elif interviewee in liars:
+            while True:
+                zophieClues[interviewee] = random.choice(SUSPECTS)
+                if zophieClues[interviewee] != culprit:
+                    break
+
+    elif kindOfClue == 2:
+        if interviewee not in liars:
+            zophieClues[interviewee] = PLACES[SUSPECTS.index(culprit)]
+        elif  interviewee in liars:
+            while True:
+                zophieClues[interviewee] = random.choice(PLACES)
+                if zophieClues[interviewee] != PLACES[SUSPECTS.index(culprit)]:
+                    break
+    elif kindOfClue == 3:
+        if interviewee not in liars:
+            zophieClues[interviewee] = ITEMS[SUSPECTS.index(culprit)]
+        elif interviewee in liars:
+            while True:
+                zophieClues[interviewee] = random.choice(ITEMS)
+                if zophieClues[interviewee] != ITEMS[SUSPECTS.index(culprit)]:
+                    break
 
 
+input('Press Enter to begin...')
 
 
+startTime = time.time()
+endTime = startTime + TIME_TO_SOLVE
 
 
+while True:
+    if time.time() > endTime or accusationsLeft == 0:
+        if time.time() > endTime:
+            print('You have run out of time!')
+        elif accusationsLeft == 0:
+            print('You have accused too many innocent people!')
+        culpritIndex = SUSPECTS.index(culprit)
+        print('It was {} at the {} with the {} who catnapped her!'.format(culprit,PLACES[culpritIndex], ITEMS[culpritIndex]))
+        print('Better luck next time, Detective.')
+        sys.exit()
+
+    print()
+    minutesLeft = int(endTime - time.time()) // 60
+    secondsLeft = int(endTime - time.time()) % 60
+    print('Time left: {} min, {} sec'.format(minutesLeft, secondsLeft))
+
+    if currentLocation == 'TAXI':
+        print(' You are in your TAXI. Where do you want to go?')
+        for place in sorted(PLACES):
+            placeInfo = ''
+            if place in visitedPlaces:
+                placeInfo = visitedPlaces[place]
+            nameLabel = '(' + place[0] + ')' + place[1:]
+            spacing = " " * (LONGEST_PLACE_NAME_LENGTH - len(place))
+            print('{} {}{}'.format(nameLabel, spacing, placeInfo))
+        print('(Q)UIT GAME')
+        while True:
+            response = input('> ').upper()
+            if response == '':
+                continue
+            if response == 'Q':
+                print('Thanks for playing!')
+                sys.exit()
+            if response in PLACE_FIRST_LETTERS.keys():
+                break
+
+        currentLocation = PLACE_FIRST_LETTERS[response]
+        continue
+
+    print(' You are at the {}.'.format(currentLocation))
+    currentLocationIndex = PLACES.index(currentLocation)
+    thePersonHere = SUSPECTS[currentLocationIndex]
+    theItemHere = ITEMS[currentLocationIndex]
+    print(' {} with the {} is here.'.format(thePersonHere, theItemHere))
+
+    if thePersonHere not in knownSuspectsAndItems:
+        knownSuspectsAndItems.append(thePersonHere)
+    if ITEMS[currentLocationIndex] not in knownSuspectsAndItems:
+        knownSuspectsAndItems.append(ITEMS[currentLocationIndex])
+    if currentLocation not in visitedPlaces.keys():
+        visitedPlaces[currentLocation] = '({}, {})'.format(thePersonHere.lower(),theItemHere.lower())
+
+    if thePersonHere in accusedSuspects:
+        print('They are offended that you accused them,')
+        print('and will not help with your investigation.')
+        print('You go back to your TAXI.')
+        print()
+        input('Press Enter to continue...')
+        currentLocation = 'TAXI'
+        continue
+
+    print()
+    print('(J) "J\'ACCUSE!" ({} accusations left)'.format(accusationsLeft))
+    print('(Z) Ask if they know where ZOPHIE THE CAT is.')
+    print('(T) Go back to the TAXI.')
+    for i, suspectOrItem in enumerate(knownSuspectsAndItems):
+        print('({}) Ask about {}'.format(i + 1, suspectOrItem))
 
 
+    while True:
+        response = input('> ').upper()
+        if response in 'JZT' or (response.isdecimal() and 0 < int(response) <= len(knownSuspectsAndItems)):
+            break
 
+    if response == 'J':
+        accusationsLeft -= 1
+        if thePersonHere == culprit:
+            print('You\'ve cracked the case, Detective!')
+            print('It was {} who had catnapped ZOPHIE THE CAT.'.format(culprit))
+            minutesTaken = int(time.time() - startTime) // 60
+            secondsTaken = int(time.time() - startTime) % 60
+            print('Good job! You solved it in {} min, {} sec.'.format(minutesTaken,secondsTaken))
+            sys.exit()
+        else:
+            accusedSuspects.append(thePersonHere)
+            print('You have accused the wrong person, Detective!')
+            print('They will not help you with anymore clues.')
+            print('You go back to your TAXI.')
+            currentLocation = 'TAXI'
 
+    elif response == 'Z':
+        if thePersonHere not in zophieClues:
+            print('"I don\'t know anything about ZOPHIE THE CAT."')
+        elif thePersonHere in zophieClues:
+            print(' They give you this clue: "{}"'.format(zophieClues[thePersonHere]))
+            if zophieClues[thePersonHere] not in knownSuspectsAndItems and zophieClues[thePersonHere] not in PLACES:
+                knownSuspectsAndItems.append(zophieClues[thePersonHere])
+
+    elif response == 'T':
+        currentLocation = 'TAXI'
+        continue
+
+    else:
+        thingBeingAskedAbout = knownSuspectsAndItems[int(response) - 1]
+        if thingBeingAskedAbout in (thePersonHere, theItemHere):
+            print(' They give you this clue: "No comment."')
+        else:
+            print(' They give you this clue:"{}"'.format(clues[thePersonHere][thingBeingAskedAbout]))
+            if clues[thePersonHere][thingBeingAskedAbout] not in knownSuspectsAndItems and clues[thePersonHere][thingBeingAskedAbout] not in PLACES:
+                knownSuspectsAndItems.append(clues[thePersonHere][thingBeingAskedAbout])
+
+    input('Press Enter to continue...')
 
 
 
