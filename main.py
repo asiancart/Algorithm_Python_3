@@ -1,18 +1,34 @@
-print('Multiplication Table, by asiancart')
+import sys,time
 
-print(' |   0   1   2   3   4   5   6   7   8   9  10  11  12')
-print('--+---------------------------------------------------')
+print('Ninety-Nine Bottles, by asiancart')
+print()
+print('(Press Ctrl-C to quit.)')
 
+time.sleep(2)
 
-for number1 in range(0,13):
+bottles = 99
+PAUSE = 2
 
-    print(str(number1).rjust(2),end='')
+try:
+    while bottles > 1:
+        print(bottles, 'bottles of milk on the wall,')
+        time.sleep(PAUSE)
+        print(bottles, 'bottles of milk, ')
+        time.sleep(PAUSE)
+        print('Take one down, pass it around,')
+        time.sleep(PAUSE)
 
-    print('|',end='')
+        bottles = bottles -1
+        print(bottles,'bottles of milk on the wall!')
+        time.sleep(PAUSE)
+        print()
 
-    for number2 in range(0,13):
-
-       print(str(number1*number2).rjust(3),end=' ')
-
-
-    print()
+    print('1 bottle of milk on the wall,')
+    time.sleep(PAUSE)
+    print('1 bottle of milk,')
+    time.sleep(PAUSE)
+    print('Take it down, pass it around,')
+    time.sleep(PAUSE)
+    print('No more bottles of milk on the wall!')
+except KeyboardInterrupt:
+    sys.exit()
