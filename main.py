@@ -1,34 +1,27 @@
-import sys,time
+print('''Numeral System Counters, by asiancart''')
 
-print('Ninety-Nine Bottles, by asiancart')
-print()
-print('(Press Ctrl-C to quit.)')
+while True:
+    response = input('Enter the starting number > ')
+    if response == '':
+        response = 0
+        break
+    if response.isdecimal():
+        break
+    print('Please enter a number greater than or equal to 0.')
+start= int(response)
 
-time.sleep(2)
+while True:
+    response = input('Enter how many numbers to display > ')
+    if response == '':
+        response = 1000
+        break
+    if response.isdecimal():
+        break
+    print('please enter a number.')
+amount=int(response)
 
-bottles = 99
-PAUSE = 2
+for number in range(start,start+amount):
+    hexNumber= hex(number)[2:].upper()
+    binNumber = bin(number)[2:]
 
-try:
-    while bottles > 1:
-        print(bottles, 'bottles of milk on the wall,')
-        time.sleep(PAUSE)
-        print(bottles, 'bottles of milk, ')
-        time.sleep(PAUSE)
-        print('Take one down, pass it around,')
-        time.sleep(PAUSE)
-
-        bottles = bottles -1
-        print(bottles,'bottles of milk on the wall!')
-        time.sleep(PAUSE)
-        print()
-
-    print('1 bottle of milk on the wall,')
-    time.sleep(PAUSE)
-    print('1 bottle of milk,')
-    time.sleep(PAUSE)
-    print('Take it down, pass it around,')
-    time.sleep(PAUSE)
-    print('No more bottles of milk on the wall!')
-except KeyboardInterrupt:
-    sys.exit()
+    print('DEC:',number, '   HEX:', hexNumber, '   BIN:', binNumber)
