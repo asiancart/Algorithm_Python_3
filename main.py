@@ -1,45 +1,46 @@
-import math , sys
+import random , time
+
+BAR = chr(9608)
 
 def main():
-    print('Prime Numbers, by asiancart')
-    print('Prime numbers are numbers that are only evenly divisible by')
-    print('one and themselves. They are used in a variety of practical')
-    print('applications, but cannot be predicted. They must be')
-    print('calculated one at a time.')
-    print()
+    print('Progress Bar Simulation, by asiancart')
+    bytesDownloaded= 0
+    downloadSize = 4096
+    while bytesDownloaded < downloadSize:
+        bytesDownloaded += random.randint(0,100)
 
-    while True:
-        print('Enter a number to start searching for primes from:')
-        print('(Try 0 or 1000000000000 (12 zeros) or another number.)')
-        response = input('> ')
-        if response.isdecimal():
-            num = int(response)
-            break
+        barStr = getProgressBar(bytesDownloaded,downloadSize)
 
-    input('Press Ctrl-C at any time to quit. Press Enter to begin...')
+        print(barStr,end='',flush=True)
+        time.sleep(0.2)
+
+        print('\b' * len(barStr),end='',flush=True)
 
 
-    while True:
-        if isPrime(num):
-            print(str(num)+',',end='',flush=True)
-        num = num +1
+def getProgressBar(progress,total,barWidth=40):
+
+    progressBar = ''
+    progressBar += '['
+
+    if progress > total:
+        progress = total
+    if progress< total:
+        progress = 0
 
 
-def isPrime(number):
-    if number < 2:
-        return False
-    elif number == 2:
-        return True
+    numberOfBars = int((progress/total) *barWidth)
 
-    for i in range(2,int(math.sqrt(number))+1):
-        if number % i == 0:
-            return False
-    return True
+    progressBar += BAR * numberOfBars
+    progressBar += ' ' * (barWidth-numberOfBars)
+    progressBar += ']'
+
+    percentComplete = round(progress/total*100,1)
+    progressBar = ' ' + str(percentComplete)+ '%'
+
+    progressBar += ' ' +str(progress)+ '/' +str(total)
+
+    return progressBar
 
 
-if __name__ =='__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit()
-
+if __name__ == '__main__':
+    main()
