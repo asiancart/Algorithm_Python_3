@@ -1,49 +1,28 @@
-import time , sys
+import math, shutil, sys, time
 
-print('''Rock, Paper, Scissors, by asiancart ''')
+WIDTH, HEIGHT = shutil.get_terminal_size()
 
+WIDTH -=1
 
-wins = 0
-
+print('Sine message by asiancart')
+print('Press Ctrl-C to Quit.')
+print()
+print('What message do you want to display? (Max', WIDTH // 2, 'chars.)')
 while True:
+    message = input('> ')
+    if 1 <= len(message) <= (WIDTH//2):
+        break
+    print('Message must be 1 to',WIDTH//2,'characters long.')
+
+
+step = 0.0
+multiplier = (WIDTH-len(message)) / 2
+try:
     while True:
-        print('{} Wins, 0 Losses, 0 Ties'.format(wins))
-        print('Enter your move R , P , S , (Q)uit')
-        playerMove = input('> ').upper()
-        if playerMove == 'Q':
-            print('Thanks for playing')
-            sys.exit()
-
-        if playerMove== 'R' or playerMove=='P' or playerMove=='S':
-            break
-        else:
-            print('Type P R S or Q.')
-
-    if playerMove == 'R':
-        print('ROCK versus...')
-    elif playerMove == 'P':
-        print('PAPER versus...')
-    elif playerMove == 'S':
-        print('SCISSORS versus...')
-
-
-    time.sleep(0.5)
-    print('1...')
-    time.sleep(0.25)
-    print('2...')
-    time.sleep(0.25)
-    print('3...')
-    time.sleep(0.25)
-
-
-    if playerMove == 'R':
-        print('Scissors')
-    elif playerMove == 'P':
-        print('Rock')
-    elif playerMove == 'S':
-        print('Paper')
-
-    time.sleep(0.5)
-
-    print('You win')
-    wins = wins +1
+        sinOfStep = math.sin(step)
+        padding = ' ' * int((sinOfStep + 1) * multiplier)
+        print(padding + message)
+        time.sleep(0.1)
+        step += 0.25
+except KeyboardInterrupt:
+    sys.exit()
