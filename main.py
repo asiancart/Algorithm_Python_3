@@ -1,120 +1,46 @@
-import random, sys
+import matplotlib.pyplot as plt
 
-BLANK = ' '
-
-
-def main():
-    print('''Sliding Tile Puzzle, by asiancart''')
-    input('Press Enter to begin...')
-
-    gameBoard = getNewPuzzle()
-
-    while True:
-        displayBoard(gameBoard)
-        playerMove = askForPlayerMove(gameBoard)
-        makeMove(gameBoard,playerMove)
-
-        if gameBoard == getNewBoard():
-            print('You won')
-            sys.exit()
+class Rocket():
+    def __init__(self,x=0,y=0):
+        self.x = x
+        self.y = y
 
 
-def getNewBoard():
-    return [['1 ', '5 ', '9 ', '13'], ['2 ', '6 ', '10', '14'],['3 ', '7 ', '11', '15'], ['4 ', '8 ', '12', BLANK]]
+    def move_up(self):
+        self.y +=1
+
+    def move_downn(self):
+        self.y -=1
+
+    def move_right(self):
+        self.x +=1
+
+    def move_left(self):
+        self.x -=1
 
 
-def displayBoard(board):
-    labels = [board[0][0], board[1][0], board[2][0], board[3][0],
-              board[0][1], board[1][1], board[2][1], board[3][1],
-              board[0][2], board[1][2], board[2][2], board[3][2],
-              board[0][3], board[1][3], board[2][3], board[3][3]]
-
-    boardToDraw = """   
-                        +------+------+------+------+
-                        |      |      |      |      |
-                        |  {}  |  {}  |  {}  |  {}  |
-                        |      |      |      |      |
-                        +------+------+------+------+
-                        |      |      |      |      |
-                        |  {}  |  {}  |  {}  |  {}  |
-                        |      |      |      |      |
-                        +------+------+------+------+
-                        |      |      |      |      |
-                        |  {}  |  {}  |  {}  |  {}  |
-                        |      |      |      |      |
-                        +------+------+------+------+
-                        |      |      |      |      |
-                        |  {}  |  {}  |  {}  |  {}  |
-                        |      |      |      |      |
-                        +------+------+------+------+ """.format(*labels)
-    print(boardToDraw)
+rockets = []
+rockets.append(Rocket())
+rockets.append(Rocket(0,2))
+rockets.append(Rocket(1,4))
+rockets.append(Rocket(2,6))
+rockets.append(Rocket(3,7))
+rockets.append(Rocket(5,9))
+rockets.append(Rocket(8,15))
 
 
-def findBlankSpace(board):
-    for x in range(4):
-        for y in range(4):
-            if board[x][y] ==' ':
-                return (x,y)
+for index,rocket in enumerate(rockets):
+    print('Rocket %d is at (%d,%d).'% (index,rocket.x,rocket.y))
 
+    plt.plot(rocket.x,rocket.y,'ro',linewidth=2,linestyle='dashed',markersize=12)
 
-def askForPlayerMove(board):
-    blankx, blanky = findBlankSpace(board)
+    rocket.move_up()
+    print('New Rocket position %d is at(%d, %d).'%(index,rocket.x,rocket.y))
 
-    w = 'W' if blanky != 3 else ' '
-    a = 'A' if blankx != 3 else ' '
-    s = 'S' if blanky != 0 else ' '
-    d = 'D' if blankx != 0 else ' '
+    plt.plot(rocket.x,rocket.y, 'bo', linewidth=2, linestyle='dashed',markersize=12)
 
-    while True:
-        print('                      ({})'.format(w))
-        print('Enter WASD (or QUIT): ({}) ({}) ({})'.format(a, s, d))
+    rocket.move_left()
+    plt.plot(rocket.x,rocket.y,'yo',linewidth=2,linestyle='dashed',markersize=12)
 
-
-        response = input('> ').upper()
-        if response =='QUIT':
-            sys.exit()
-        if response in (w+a+s+d).replace(' ',''):
-            return response
-
-
-def makeMove(board,move):
-    bx,by= findBlankSpace(board)
-
-    if move == 'W':
-        board[bx][by], board[bx][by+1] = board[bx][by+1], board[bx][by]
-    elif move == 'A':
-        board[bx][by], board[bx + 1][by] = board[bx + 1][by], board[bx][by]
-    elif move == 'S':
-        board[bx][by], board[bx][by - 1] = board[bx][by - 1], board[bx][by]
-    elif move == 'D':
-        board[bx][by], board[bx - 1][by] = board[bx - 1][by], board[bx][by]
-
-
-def makeRandomMove(board):
-    blankx,blanky = findBlankSpace(board)
-    validMoves = []
-    if blanky != 3:
-        validMoves.append('W')
-    if blankx != 3:
-        validMoves.append('A')
-    if blanky != 0:
-        validMoves.append('S')
-    if blankx != 0:
-        validMoves.append('D')
-
-
-    makeMove(board,random.choice(validMoves))
-
-
-def getNewPuzzle(moves=200):
-    board = getNewBoard()
-
-    for i in range(moves):
-        makeRandomMove(board)
-    return board
-
-
-if __name__ == '__main__':
-    main()
-
-
+plt.gca().legend(('original position','^ -Moved up','< -Moved left'))
+plt.show()
