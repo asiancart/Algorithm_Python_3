@@ -1,46 +1,62 @@
-import matplotlib.pyplot as plt
+import random,time,sys
 
-class Rocket():
-    def __init__(self,x=0,y=0):
-        self.x = x
-        self.y = y
+MAX_NUM_SNAILS = 8
+MAX_NAME_LENGTH = 20
+FINISH_LINE = 30
+
+print('''Snail Race, by asiancart ''')
+
+while True:
+    print('How many snails will race? Max:',MAX_NUM_SNAILS)
+    response = input('> ')
+    if response.isdecimal():
+        numSnailRacing = int(response)
+        if 1 < numSnailRacing <= MAX_NUM_SNAILS:
+            break
+
+    print('Enter a number between 2 and',MAX_NUM_SNAILS)
+
+snailNames = []
+for i in range(1,numSnailRacing+1):
+    while True:
+        print('Enter snail #' + str(i)+"'s name:")
+        name = input('> ')
+        if len(name)==0:
+            print('Please enter a name')
+        elif name in snailNames:
+            print('Choose a name that has not already been used.')
+        else:
+            break
+    snailNames.append(name)
 
 
-    def move_up(self):
-        self.y +=1
+print('\n'*40)
+print('START'+(' '* (FINISH_LINE-len('START'))+'FINISH'))
+print('|'+(' '* (FINISH_LINE-len('|'))+'|'))
+snailProgress = {}
+for snailName in snailNames:
+    print(snailName[:MAX_NAME_LENGTH])
+    print('@v')
+    snailProgress[snailName] = 0
 
-    def move_downn(self):
-        self.y -=1
+time.sleep(1.5)
 
-    def move_right(self):
-        self.x +=1
+while True:
+    for i in range(random.randint(1,numSnailRacing//2)):
+        randomSnailName = random.choice(snailNames)
+        snailProgress[randomSnailName] +=1
 
-    def move_left(self):
-        self.x -=1
+        if snailProgress[randomSnailName] == FINISH_LINE:
+            print(randomSnailName,'has won')
+            sys.exit()
 
+    time.sleep(0.5)
 
-rockets = []
-rockets.append(Rocket())
-rockets.append(Rocket(0,2))
-rockets.append(Rocket(1,4))
-rockets.append(Rocket(2,6))
-rockets.append(Rocket(3,7))
-rockets.append(Rocket(5,9))
-rockets.append(Rocket(8,15))
+    print('\n'*40)
+    print('START' + (' ' * (FINISH_LINE - len('START')) + 'FINISH'))
+    print('|' + (' ' * (FINISH_LINE - 1) + '|'))
 
-
-for index,rocket in enumerate(rockets):
-    print('Rocket %d is at (%d,%d).'% (index,rocket.x,rocket.y))
-
-    plt.plot(rocket.x,rocket.y,'ro',linewidth=2,linestyle='dashed',markersize=12)
-
-    rocket.move_up()
-    print('New Rocket position %d is at(%d, %d).'%(index,rocket.x,rocket.y))
-
-    plt.plot(rocket.x,rocket.y, 'bo', linewidth=2, linestyle='dashed',markersize=12)
-
-    rocket.move_left()
-    plt.plot(rocket.x,rocket.y,'yo',linewidth=2,linestyle='dashed',markersize=12)
-
-plt.gca().legend(('original position','^ -Moved up','< -Moved left'))
-plt.show()
+    for snailName in snailNames:
+        spaces = snailProgress[snailName]
+        print((' ' * spaces) + snailName[:MAX_NAME_LENGTH])
+        print(('.' * snailProgress[snailName]) + '@v')
