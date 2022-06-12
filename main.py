@@ -1,47 +1,25 @@
-import random
-
+import sys
 
 try:
-    import pyperclip
+    import pyttsx3
 except ImportError:
-    pass
+    print('The pyttsx3 module needs to be installed to run this')
+    print('program. On Windows, open a Command Prompt and run:')
+    print('pip install pyttsx3')
+    print('On macOS and Linux, open a Terminal and run:')
+    print('pip3 install pyttsx3')
+    sys.exit()
 
 
-def main():
-    """Run the Spongetext program."""
-    print('''sPoNgEcAsE, bY aSianCarT''')
+tts = pyttsx3.init()
 
-    spongetext = englishToSpongecase(input('> '))
-    print()
-    print(spongetext)
+print('Text To Speech Talker, by asiancart')
 
-    try:
-        pyperclip.copy(spongetext)
-        print('(cOpIed SpOnGeTexT to ClIpbOaRd.)')
-    except:
-        pass
+while True:
+    text = input('> ')
+    if text.upper() == 'QUIT':
+        print('Thanks for playing.')
+        sys.exit()
 
-
-def englishToSpongecase(message):
-    """Return the spongetext form of the given string."""
-    spongetext = ''
-    useUpper = False
-
-    for character in message:
-        if not character.isalpha():
-            spongetext += character
-            continue
-
-        if useUpper:
-            spongetext += character.upper()
-        else:
-            spongetext += character.lower()
-
-        if random.randint(1,100)<= 90:
-            useUpper = not useUpper
-
-    return spongetext
-
-
-if __name__ == '__main__':
-    main()
+    tts.say(text)
+    tts.runAndWait()
