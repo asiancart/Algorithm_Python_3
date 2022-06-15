@@ -1,126 +1,153 @@
-import pygame
-import time
 import random
 
-pygame.init()
+print('''Carrot in a Box, by asiancart. 
+This is a bluffing game for two human players. Each player has a box.
+One box has a carrot in it. To win, you must have the box with the carrot in it.
+The first player looks into their box (the second player must close
+their eyes during this). The first player then says "There is a carrot
+in my box" or "There is not a carrot in my box". The second player then
+gets to decide if they want to swap boxes or not.
+''')
 
-white = (255, 255, 255)
-yellow = (255, 255, 102)
-black = (0, 0, 0)
-red = (213, 50, 80)
-green = (0, 255, 0)
-blue = (50, 153, 213)
+input("Press enter to begin..")
 
-dis_width = 600
-dis_height = 400
+p1Name = input("Human player 1 , enter your name: ")
+p2Name = input("Human player 2 , enter your name: ")
+playerNames = p1Name[:11].center(11)+  "        "+p2Name[:11].center(11)
 
-dis = pygame.display.set_mode((dis_width, dis_height))
-pygame.display.set_caption('Snake Game by asiancart')
+print('''HERE ARE TWO BOXES
+  ___________  ___________
+ /         /| /          /|
++---------+ | +---------+ |
+|   RED   | | |   GOLD  | |
+|   BOX   | / |   BOX   | /
++---------+/  +---------+/
 
-clock = pygame.time.Clock()
+''')
 
-snake_block = 10
-snake_speed = 15
+print()
+print(playerNames)
+print()
+print(p1Name+", you have a RED box in front of you")
+print(p2Name+", you have a GOLD box in front of you")
+print()
+print(p1Name+", you will get to look into your box.")
+print(p2Name.upper()+", close your eyes and do not look please.")
+input("When "+p2Name+" has closed their eyes press Enter...")
+print()
 
-font_style = pygame.font.SysFont("bahnschrift", 25)
-score_font = pygame.font.SysFont("comicsansms", 35)
+print(p1Name+ " here is the inside of your box:")
 
+if random.randint(1,2) == 1:
+    carrotInFirstBox = True
+else:
+    carrotInFirstBox = False
 
-def Your_score(score):
-    value = score_font.render("Your Score: " + str(score), True, yellow)
-    dis.blit(value, [0, 0])
+if carrotInFirstBox:
+    print('''
+    ___VV____
+    |  VV   |
+    |  VV   |
+    |__||___|   _______
+    /  ||  /|  /     /|
+    +-----+ | +-----+ |
+    | RED | | | GOLD| |
+    | BOX | / | BOX | /
+    +-----+/  +-----+/       
+    (carrot!)''')
+    print(playerNames)
+else:
 
+    print('''
+    _________
+    |       |
+    |       |
+    |_______|  _________
+    /      /| /       /|
+    +-------+ | +----+ |
+    | RED | | | GOLD | |
+    | BOX | / | BOX  | /
+    +-----+/  +------+/
+    (no carrot!)''')
+    print(playerNames)
 
-def our_snake(snake_block, snake_list):
-    for x in snake_list:
-        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
+input("Press Enter to continue...")
 
+print("\n"*100)
+print(p1Name+", tell "+p2Name+" to open their eyes")
+input("Press Enter to continue...")
 
-def message(msg, color):
-    mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width / 6, dis_height / 3])
-
-
-def gameLoop():
-    game_over = False
-    game_close = False
-
-    x1 = dis_width / 2
-    y1 = dis_height / 2
-
-    x1_change = 0
-    y1_change = 0
-
-    snake_List = []
-    Length_of_snake = 1
-
-    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
-
-    while not game_over:
-
-        while game_close == True:
-            dis.fill(blue)
-            message("You Lost! Press C-Play Again or Q-Quit", red)
-            Your_score(Length_of_snake - 1)
-            pygame.display.update()
-
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        game_over = True
-                        game_close = False
-                    if event.key == pygame.K_c:
-                        gameLoop()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_over = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    x1_change = -snake_block
-                    y1_change = 0
-                elif event.key == pygame.K_RIGHT:
-                    x1_change = snake_block
-                    y1_change = 0
-                elif event.key == pygame.K_UP:
-                    y1_change = -snake_block
-                    x1_change = 0
-                elif event.key == pygame.K_DOWN:
-                    y1_change = snake_block
-                    x1_change = 0
-
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-            game_close = True
-        x1 += x1_change
-        y1 += y1_change
-        dis.fill(blue)
-        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
-        snake_Head = []
-        snake_Head.append(x1)
-        snake_Head.append(y1)
-        snake_List.append(snake_Head)
-        if len(snake_List) > Length_of_snake:
-            del snake_List[0]
-
-        for x in snake_List[:-1]:
-            if x == snake_Head:
-                game_close = True
-
-        our_snake(snake_block, snake_List)
-        Your_score(Length_of_snake - 1)
-
-        pygame.display.update()
-
-        if x1 == foodx and y1 == foody:
-            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
-            Length_of_snake += 1
-
-        clock.tick(snake_speed)
-
-    pygame.quit()
-    quit()
+print()
+print(p1Name + ', say one of the following sentences to ' + p2Name + '.')
+print(' 1) There is a carrot in my box.')
+print(' 2) There is not a carrot in my box.')
+print()
+input('Then press Enter to continue...')
 
 
-gameLoop()
+print()
+print(p2Name + ', do you want to swap boxes with ' + p1Name + '? YES/NO')
+while True:
+    response = input("> ").upper()
+    if not (response.startswith("Y") or response.startswith("Y")):
+        print(p2Name + ', please enter "YES" or "NO".')
+    else:
+        break
+
+
+firstBox = 'RED '
+secondBox = 'GOLD'
+
+if response.startswith('Y'):
+    carrotInFirstBox = not carrotInFirstBox
+    firstBox, secondBox = secondBox, firstBox
+
+
+print('''HERE ARE THE TWO BOXES:
+     __________  __________
+    /        /| /        /|
+    +-------+ | +-------+ |
+    |   {}  | | |  {} | |
+    |  BOX  | / |  BOX  | /
+    +-------+/  +-------+/ '''.format(firstBox,secondBox))
+print(playerNames)
+
+input('Press Enter to reveal the winner...')
+print()
+
+if carrotInFirstBox:
+    print('''
+    ___VV____
+    |  VV   |
+    |  VV   |
+    |__||___|   _______
+    /  ||  /|  /     /|
+    +-----+ | +-----+ |
+    | {} | | | {}| |
+    | BOX | / | BOX | /
+    +-----+/  +-----+/            
+    '''.format(firstBox,secondBox))
+
+else:
+    print('''
+     _______ ___VV___
+    |      | |  VV  |
+    |      | |  VV  |
+    |______| |__||__|
+     / /| / || /|
+    +-----+ | +-----+ |
+    |  {}  |   | | {} | |
+    |  BOX  | / | BOX | /
+    +-------+/  +-------+/            
+    '''.format(firstBox,secondBox))
+
+print(playerNames)
+
+if carrotInFirstBox:
+    print(p1Name+" is the winner")
+    print(p2Name+" is the winner")
+
+print("Thanks for playing.")
+
+
+
