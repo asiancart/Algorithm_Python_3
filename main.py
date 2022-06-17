@@ -1,129 +1,106 @@
-import shutil,sys
+import pygame
+from pygame.locals import *
+import random
 
-UP_DOWN_CHAR = chr(9474)
-LEFT_RIGHT_CHAR = chr(9472)
-DOWN_RIGHT_CHAR = chr(9484)
-DOWN_LEFT_CHAR = chr(9488)
-UP_RIGHT_CHAR = chr(9492) # Character 9492 is '└'
-UP_LEFT_CHAR = chr(9496) # Character 9496 is '┘'
-UP_DOWN_RIGHT_CHAR = chr(9500) # Character 9500 is '├'
-UP_DOWN_LEFT_CHAR = chr(9508) # Character 9508 is '┤'
-DOWN_LEFT_RIGHT_CHAR = chr(9516) # Character 9516 is '┬'
-UP_LEFT_RIGHT_CHAR = chr(9524) # Character 9524 is '┴'
-CROSS_CHAR = chr(9532)
+# shape parameters
+size = width, height = (800, 800)
+road_w = int(width / 1.6)
+roadmark_w = int(width / 80)
+# location parameters
+right_lane = width / 2 + road_w / 4
+left_lane = width / 2 - road_w / 4
+# animation parameters
+speed = 1
 
-CANVAS_WIDTH,CANVAS_HEIGHT = shutil.get_terminal_size()
-CANVAS_WIDTH -=1
-CANVAS_HEIGHT -=5
+# initiallize the app
+pygame.init()
+running = True
 
-canvas = {}
-cursorX=0
-cursorY=0
+# set window size
+screen = pygame.display.set_mode(size)
+# set window title
+pygame.display.set_caption("asiancart's car game")
+# set background colour
+screen.fill((60, 220, 0))
+# apply changes
+pygame.display.update()
 
-def getCanvasString(canvasData,cx,cy):
-    canvasStr=''
+# load player vehicle
+car = pygame.image.load("car1.png")
+# resize image
+# car = pygame.transform.scale(car, (250, 250))
+car_loc = car.get_rect()
+car_loc.center = right_lane, height * 0.8
 
-    for rowNum in range(CANVAS_HEIGHT):
-        for columnNum in range(CANVAS_WIDTH):
-            if columnNum== cx and rowNum == cy:
-                canvasStr +='#'
-                continue
+# load enemy vehicle
+car2 = pygame.image.load("car2.png")
+car2_loc = car2.get_rect()
+car2_loc.center = left_lane, height * 0.2
 
-            cell=canvasData.get((columnNum,rowNum))
-            if cell in (set(['W','S']), set(['W']),set(['S'])):
-                canvasStr += UP_DOWN_CHAR
-            elif cell in (set(['A', 'D']), set(['A']), set(['D'])):
-                canvasStr += LEFT_RIGHT_CHAR
-            elif cell == set(['S', 'D']):
-                canvasStr += DOWN_RIGHT_CHAR
-            elif cell == set(['A', 'S']):
-                canvasStr += DOWN_LEFT_CHAR
-            elif cell == set(['W', 'D']):
-                canvasStr += UP_RIGHT_CHAR
-            elif cell == set(['W', 'A']):
-                canvasStr += UP_LEFT_CHAR
-            elif cell == set(['W', 'S', 'D']):
-                canvasStr += UP_DOWN_RIGHT_CHAR
-            elif cell == set(['W', 'S', 'A']):
-                canvasStr += UP_DOWN_LEFT_CHAR
-            elif cell == set(['A', 'S', 'D']):
-                canvasStr += DOWN_LEFT_RIGHT_CHAR
-            elif cell == set(['W', 'A', 'D']):
-                canvasStr += UP_LEFT_RIGHT_CHAR
-            elif cell == set(['W', 'A', 'S', 'D']):
-                canvasStr += CROSS_CHAR
-            elif cell == None:
-                canvasStr += ' '
+counter = 0
+# game loop
+while running:
+    counter += 1
 
-        canvasStr += '\n'
-    return canvasStr
+    # increase game difficulty overtime
+    if counter == 5000:
+        speed += 0.15
+        counter = 0
+        print("level up", speed)
 
-moves =[]
-while True:
-    print(getCanvasString(canvas,cursorX,cursorY))
-
-    print('WASD keys to move, H for help, C to clear, '+ 'F to save, or QUIT.')
-    response = input('> ').upper()
-
-    if response == 'QUIT':
-        sys.exit()
-    elif response == 'H':
-        print('Enter W, A, S, and D characters to move the cursor and')
-        print('draw a line behind it as it moves. For example, ddd')
-        print('draws a line going right and sssdddwwwaaa draws a box.')
-        print()
-        print('You can save your drawing to a text file by entering F.')
-        input('Press Enter to return to the program...')
-        continue
-    elif response == 'C':
-        canvas = {}
-        moves.append('C')
-    elif response == 'F':
-        try:
-            print('Enter filename to save to:')
-            filename = input('> ')
-            if not filename.endswith('.txt'):
-                filename += '.txt'
-            with open(filename, 'w', encoding='utf-8') as file:
-                file.write(''.join(moves) + '\n')
-                file.write(getCanvasString(canvas, None, None))
-        except:
-            print('ERROR: Could not save file.')
-
-    for command in response:
-        if command not in ('W', 'A', 'S', 'D'):
-            continue
-        moves.append(command)
-
-        if canvas == {}:
-            if command in ('W', 'S'):
-                canvas[(cursorX, cursorY)] = set(['W', 'S'])
-            elif command in ('A', 'D'):
-                canvas[(cursorX, cursorY)] = set(['A', 'D'])
-
-        if command == 'W' and cursorY > 0:
-            canvas[(cursorX, cursorY)].add(command)
-            cursorY = cursorY - 1
-        elif command == 'S' and cursorY < CANVAS_HEIGHT - 1:
-            canvas[(cursorX, cursorY)].add(command)
-            cursorY = cursorY + 1
-        elif command == 'A' and cursorX > 0:
-            canvas[(cursorX, cursorY)].add(command)
-            cursorX = cursorX - 1
-        elif command == 'D' and cursorX < CANVAS_WIDTH - 1:
-            canvas[(cursorX, cursorY)].add(command)
-            cursorX = cursorX + 1
+    # animate enemy vehicle
+    car2_loc[1] += speed
+    if car2_loc[1] > height:
+        # randomly select lane
+        if random.randint(0, 1) == 0:
+            car2_loc.center = right_lane, -200
         else:
-            continue
+            car2_loc.center = left_lane, -200
 
-        if (cursorX, cursorY) not in canvas:
-            canvas[(cursorX, cursorY)] = set()
+    # end game logic
+    if car_loc[0] == car2_loc[0] and car2_loc[1] > car_loc[1] - 250:
+        print("GAME OVER! YOU LOST!")
+        break
 
-        if command == 'W':
-            canvas[(cursorX, cursorY)].add('S')
-        elif command == 'S':
-            canvas[(cursorX, cursorY)].add('W')
-        elif command == 'A':
-            canvas[(cursorX, cursorY)].add('D')
-        elif command == 'D':
-            canvas[(cursorX, cursorY)].add('A')
+    # event listeners
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            # collapse the app
+            running = False
+        if event.type == KEYDOWN:
+            # move user car to the left
+            if event.key in [K_a, K_LEFT]:
+                car_loc = car_loc.move([-int(road_w / 2), 0])
+            # move user car to the right
+            if event.key in [K_d, K_RIGHT]:
+                car_loc = car_loc.move([int(road_w / 2), 0])
+
+    # draw road
+    pygame.draw.rect(
+        screen,
+        (50, 50, 50),
+        (width / 2 - road_w / 2, 0, road_w, height))
+    # draw centre line
+    pygame.draw.rect(
+        screen,
+        (255, 240, 60),
+        (width / 2 - roadmark_w / 2, 0, roadmark_w, height))
+    # draw left road marking
+    pygame.draw.rect(
+        screen,
+        (255, 255, 255),
+        (width / 2 - road_w / 2 + roadmark_w * 2, 0, roadmark_w, height))
+    # draw right road marking
+    pygame.draw.rect(
+        screen,
+        (255, 255, 255),
+        (width / 2 + road_w / 2 - roadmark_w * 3, 0, roadmark_w, height))
+
+    # place car images on the screen
+    screen.blit(car, car_loc)
+    screen.blit(car2, car2_loc)
+    # apply changes
+    pygame.display.update()
+
+# collapse application window
+pygame.quit()
